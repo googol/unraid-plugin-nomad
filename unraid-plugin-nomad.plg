@@ -1,0 +1,52 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name         "nomad">
+<!ENTITY author       "googol">
+<!ENTITY version      "2023-10-16">
+<!ENTITY pluginURL    "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
+<!ENTITY nomadVersion "1.6.2">
+<!ENTITY nomadMd5     "7de14344fdbf1fb52d85f718be3dcaf9">
+<!ENTITY packagePath  "/boot/packages/nomad_&nomadVersion;_linux_amd64.zip">
+<!ENTITY configDir    "/boot/config/plugins/nomad.d">
+]>
+
+<PLUGIN  name="&name;"
+         author="&author;"
+         version="&version;"
+         pluginURL="&pluginURL;">
+    <!-- Remove old versions of the cached nomad release zip -->
+    <FILE Run="/bin/bash">
+        <INLINE>
+            rm -f "$(ls /boot/packages/nomad*.zip 2>/dev/null | grep -v '&nomadVersion;')"
+        </INLINE>
+    </FILE>
+    <!-- Fetch the correct nomad release zip -->
+    <FILE Name="&packagePath;">
+        <URL>https://releases.hashicorp.com/nomad/&nomadVersion;/nomad_&nomadVersion;_linux_amd64.zip</URL>
+        <MD5>&nomadMd5;</MD5>
+    </FILE>
+    <!-- On startup, extract the nomad executable from the release zip into the correct place-->
+    <FILE Run="/bin/bash">
+        <INLINE>
+            unzip "&packagePath;" -d /usr/bin/
+
+            mkdir -p "&configDir;"
+
+            if [ -z "$(pidof nomad)" ]; then
+                echo "Starting nomad"
+                echo '/usr/bin/nomad --config "&configDir;"' | at now
+            else
+                echo "Nomad already running"
+            fi
+        </INLINE>
+    </FILE>
+    <!-- The 'remove' script. -->
+    <FILE Run="/bin/bash" Method="remove">
+        <INLINE>
+            killall nomad
+            rm /boot/packages/nomad_*.zip
+            rm -r &pluginDir;
+        </INLINE>
+    </FILE>
+</PLUGIN>
