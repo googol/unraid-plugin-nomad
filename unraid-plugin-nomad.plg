@@ -3,14 +3,14 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name         "nomad">
 <!ENTITY author       "googol">
-<!ENTITY version      "2023-10-16-b">
+<!ENTITY version      "2023-10-16-c">
 <!ENTITY pluginURL    "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
 <!ENTITY nomadVersion "1.6.2">
 <!ENTITY nomadMd5     "7de14344fdbf1fb52d85f718be3dcaf9">
 <!ENTITY packagePath  "/boot/packages/nomad_&nomadVersion;_linux_amd64.zip">
-<!ENTITY pluginDir    "/boot/config/plugins/nomad">
+<!ENTITY pluginDir    "/boot/config/plugins/&name;">
 <!ENTITY configDir    "&pluginDir;/config.d">
-<!ENTITY uiDir        "/usr/local/emhttp/plugins/nomad">
+<!ENTITY uiDir        "/usr/local/emhttp/plugins/&name;">
 ]>
 
 <PLUGIN  name="&name;"
