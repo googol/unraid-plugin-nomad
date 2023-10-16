@@ -46,7 +46,7 @@
         <INLINE>
             killall nomad
             rm /boot/packages/nomad_*.zip
-            rm -r &pluginDir;
+            rm -r &configDir;
         </INLINE>
     </FILE>
 </PLUGIN>
