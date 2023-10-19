@@ -10,6 +10,7 @@
 <!ENTITY packagePath  "/boot/packages/nomad_&nomadVersion;_linux_amd64.zip">
 <!ENTITY pluginDir    "/boot/config/plugins/&name;">
 <!ENTITY configDir    "&pluginDir;/config.d">
+<!ENTITY mountsDir    "&pluginDir;/mounts.d">
 <!ENTITY uiDir        "/usr/local/emhttp/plugins/&name;">
 ]>
 
@@ -42,12 +43,20 @@
             Runs a nomad agent on unraid. Add your config files in &configDir;.
         </INLINE>
     </FILE>
-    <!-- On startup, extract the nomad executable from the release zip into the correct place-->
-    <FILE Run="/bin/bash">
+    <FILE Name="/usr/bin/run-nomad">
         <INLINE>
-            unzip "&packagePath;" -d /usr/bin/
+            rm -rf "&mountsDir;/*"
 
-            mkdir -p "&configDir;"
+            for dirpath in /mnt/user/appdata/*; do
+                dirname="$(basename $dirpath)"
+                echo &lt;&lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
+client {
+  host_volume "$dirname" {
+    path = "$dirpath"
+  }
+}
+EOF
+            done
 
             if [ -z "$(pidof nomad)" ]; then
                 echo "Starting nomad"
@@ -55,6 +64,17 @@
             else
                 echo "Nomad already running"
             fi
+        </INLINE>
+    </FILE>
+    <!-- On startup, extract the nomad executable from the release zip into the correct place-->
+    <FILE Run="/bin/bash">
+        <INLINE>
+            unzip "&packagePath;" -d /usr/bin/
+
+            mkdir -p "&configDir;"
+            mkdir -p "&mountsDir;"
+
+            /usr/bin/run-nomad
         </INLINE>
     </FILE>
     <!-- The 'remove' script. -->
