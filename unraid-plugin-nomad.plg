@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name         "nomad">
 <!ENTITY author       "googol">
-<!ENTITY version      "2023-10-19">
+<!ENTITY version      "2023-10-20-a">
 <!ENTITY pluginURL    "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
 <!ENTITY nomadVersion "1.6.2">
 <!ENTITY nomadMd5     "7de14344fdbf1fb52d85f718be3dcaf9">
@@ -49,7 +49,7 @@
 
             for dirpath in /mnt/user/appdata/*; do
                 dirname="$(basename $dirpath)"
-                echo &lt;&lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
+                echo &lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
 client {
   host_volume "$dirname" {
     path = "$dirpath"
@@ -70,6 +70,7 @@ EOF
     <FILE Run="/bin/bash">
         <INLINE>
             unzip "&packagePath;" -d /usr/bin/
+            chmod +x "/usr/bin/run-nomad"
 
             mkdir -p "&configDir;"
             mkdir -p "&mountsDir;"
