@@ -54,26 +54,26 @@ Runs a nomad agent on unraid. Add your config files in &configDir;.
 rm -rf "&mountsDir;/*"
 
 for dirpath in /mnt/user/appdata/*; do
-dirname="$(basename $dirpath)"
-echo &lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
-client {
-host_volume "$dirname" {
-path = "$dirpath"
-}
-}
+    dirname="$(basename $dirpath)"
+    echo &lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
+    client {
+        host_volume "$dirname" {
+            path = "$dirpath"
+        }
+    }
 EOF
 done
 
 if ! [ -d "/mnt/user/appdata/nomad" ]; then
-echo "Array not started, cannot start nomad"
-exit 0
+    echo "Array not started, cannot start nomad"
+    exit 0
 fi
 
 if [ -z "$(pidof nomad)" ]; then
-echo "Starting nomad"
-echo '/usr/bin/nomad agent -config "&configDir;" -config "&mountsDir;"' | at now
+    echo "Starting nomad"
+    echo '/usr/bin/nomad agent -config "&configDir;" -config "&mountsDir;"' | at now
 else
-echo "Nomad already running"
+    echo "Nomad already running"
 fi
 </INLINE>
 </FILE>
