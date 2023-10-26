@@ -11,7 +11,7 @@
 <!ENTITY pluginDir    "/boot/config/plugins/&name;">
 <!ENTITY configDir    "&pluginDir;/config.d">
 <!ENTITY mountsDir    "&pluginDir;/mounts.d">
-<!ENTITY dataDir      "/mnt/user/appdata/&name;"
+<!ENTITY dataDir      "/mnt/user/appdata/&name;">
 <!ENTITY uiDir        "/usr/local/emhttp/plugins/&name;">
 ]>
 
