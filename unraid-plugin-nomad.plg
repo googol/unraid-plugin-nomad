@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name         "nomad">
 <!ENTITY author       "googol">
-<!ENTITY version      "2023-10-26-b">
+<!ENTITY version      "2023-10-26-c">
 <!ENTITY pluginURL    "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
 <!ENTITY nomadVersion "1.6.2">
 <!ENTITY nomadMd5     "7de14344fdbf1fb52d85f718be3dcaf9">
@@ -22,7 +22,9 @@ pluginURL="&pluginURL;">
 <!-- Remove old versions of the cached nomad release zip -->
 <FILE Run="/bin/bash">
 <INLINE>
+<![CDATA[
 rm -f "$(ls /boot/packages/nomad*.zip 2>/dev/null | grep -v '&nomadVersion;')"
+]]>
 </INLINE>
 </FILE>
 
@@ -43,14 +45,17 @@ rm -f "$(ls /boot/packages/nomad*.zip 2>/dev/null | grep -v '&nomadVersion;')"
 
 <FILE Name="&uiDir;/README.md">
 <INLINE>
+<![CDATA[
 **&name;**
 
 Runs a nomad agent on unraid. Add your config files in &configDir;.
+]]>
 </INLINE>
 </FILE>
 
 <FILE Name="/usr/bin/run-nomad">
 <INLINE>
+<![CDATA[
 #!/usr/bin/bash
 rm -rf "&mountsDir;/*"
 
@@ -78,12 +83,14 @@ if [ -z "$(pidof nomad)" ]; then
 else
     echo "Nomad already running"
 fi
+]]>
 </INLINE>
 </FILE>
 
 <!-- On startup, extract the nomad executable from the release zip into the correct place-->
 <FILE Run="/bin/bash">
 <INLINE>
+<![CDATA[
 unzip "&packagePath;" -d /usr/bin/
 chmod +x "/usr/bin/run-nomad"
 
@@ -91,16 +98,19 @@ mkdir -p "&configDir;"
 mkdir -p "&mountsDir;"
 
 /usr/bin/run-nomad
+]]>
 </INLINE>
 </FILE>
 
 <!-- The 'remove' script. -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
+<![CDATA[
 killall nomad
 rm /boot/packages/nomad_*.zip
 rm -rf "&pluginDir;"
 rm -rf "&uiDir;"
+]]>
 </INLINE>
 </FILE>
 
