@@ -11,6 +11,7 @@
 <!ENTITY pluginDir    "/boot/config/plugins/&name;">
 <!ENTITY configDir    "&pluginDir;/config.d">
 <!ENTITY mountsDir    "&pluginDir;/mounts.d">
+<!ENTITY dataDir      "/mnt/user/appdata/&name;"
 <!ENTITY uiDir        "/usr/local/emhttp/plugins/&name;">
 ]>
 
@@ -54,24 +55,26 @@ Runs a nomad agent on unraid. Add your config files in &configDir;.
 rm -rf "&mountsDir;/*"
 
 for dirpath in /mnt/user/appdata/*; do
-    dirname="$(basename $dirpath)"
-    echo &lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
-    client {
-        host_volume "$dirname" {
-            path = "$dirpath"
-        }
+    if [[ "$dirpath" != "&dataDir;" ]]; then
+        dirname="$(basename $dirpath)"
+        echo &lt;&lt;EOF &gt; "&mountsDir;/${dirname}-mount.hcl"
+client {
+    host_volume "$dirname" {
+        path = "$dirpath"
     }
+}
 EOF
+    done
 done
 
-if ! [ -d "/mnt/user/appdata/nomad" ]; then
+if ! [ -d "&dataDir;" ]; then
     echo "Array not started, cannot start nomad"
     exit 0
 fi
 
 if [ -z "$(pidof nomad)" ]; then
     echo "Starting nomad"
-    echo '/usr/bin/nomad agent -config "&configDir;" -config "&mountsDir;"' | at now
+    echo '/usr/bin/nomad agent -client -data-dir="&dataDir;" -config "&configDir;" -config "&mountsDir;"' | at now
 else
     echo "Nomad already running"
 fi
