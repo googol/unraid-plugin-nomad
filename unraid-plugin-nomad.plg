@@ -1,18 +1,21 @@
 <?xml version='1.0' standalone='yes'?>
 
 <!DOCTYPE PLUGIN [
-<!ENTITY name         "nomad">
-<!ENTITY author       "googol">
-<!ENTITY version      "2023-10-27-e">
-<!ENTITY pluginURL    "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
-<!ENTITY nomadVersion "1.6.2">
-<!ENTITY nomadMd5     "7de14344fdbf1fb52d85f718be3dcaf9">
-<!ENTITY packagePath  "/boot/packages/nomad_&nomadVersion;_linux_amd64.zip">
-<!ENTITY pluginDir    "/boot/config/plugins/&name;">
-<!ENTITY configDir    "&pluginDir;/config.d">
-<!ENTITY mountsDir    "&pluginDir;/mounts.d">
-<!ENTITY dataDir      "/mnt/user/appdata/&name;">
-<!ENTITY uiDir        "/usr/local/emhttp/plugins/&name;">
+<!ENTITY name                  "nomad">
+<!ENTITY author                "googol">
+<!ENTITY version               "2023-10-28">
+<!ENTITY pluginURL             "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
+<!ENTITY nomadVersion          "1.6.2">
+<!ENTITY nomadMd5              "7de14344fdbf1fb52d85f718be3dcaf9">
+<!ENTITY packagePath           "/boot/packages/nomad_&nomadVersion;_linux_amd64.zip">
+<!ENTITY cniPluginsVersion     "1.3.0">
+<!ENTITY cniPluginsMd5         "bed887ab880d6afda108bf4b9f53e2dd">
+<!ENTITY cniPluginsPackagePath "/boot/packages/cni-plugins-linux-amd64-v&cniPluginsVersion;.tgz">
+<!ENTITY pluginDir             "/boot/config/plugins/&name;">
+<!ENTITY configDir             "&pluginDir;/config.d">
+<!ENTITY mountsDir             "&pluginDir;/mounts.d">
+<!ENTITY dataDir               "/mnt/user/appdata/&name;">
+<!ENTITY uiDir                 "/usr/local/emhttp/plugins/&name;">
 ]>
 
 <PLUGIN  name="&name;" author="&author;" version="&version;" pluginURL="&pluginURL;">
@@ -20,6 +23,7 @@
 <FILE Run="/bin/bash">
 <INLINE>
 rm -f "$(ls /boot/packages/nomad*.zip 2>/dev/null | grep -v '&nomadVersion;')"
+rm -f "$(ls /boot/packages/cni-plugins-*.tgz 2>/dev/null | grep -v '&cniPluginsVersion;')"
 rm -f "/usr/bin/run-nomad"
 rm -rf "&uiDir;"
 </INLINE>
@@ -29,6 +33,12 @@ rm -rf "&uiDir;"
 <FILE Name="&packagePath;">
 <URL>https://releases.hashicorp.com/nomad/&nomadVersion;/nomad_&nomadVersion;_linux_amd64.zip</URL>
 <MD5>&nomadMd5;</MD5>
+</FILE>
+
+<!-- Fetch the correct cni plugins release tarball -->
+<FILE Name="&cniPluginsPackagePath;">
+<URL>https://github.com/containernetworking/plugins/releases/download/v&cniPluginsVersion;/cni-plugins-linux-amd64-v&cniPluginsVersion;.tgz</URL>
+<MD5>&cniPluginsMd5;</MD5>
 </FILE>
 
 <!-- Fetch a nice icon for the ui -->
@@ -86,10 +96,16 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 unzip "&packagePath;" -d /usr/bin/
+mkdir -p /opt/cni/bin
+tar -c /opt/cni/bin -xzf "&cniPluginsPackagePath;"
 chmod +x "/usr/bin/run-nomad"
 
 mkdir -p "&configDir;"
 mkdir -p "&mountsDir;"
+
+echo 1 &gt; /proc/sys/net/bridge/bridge-nf-call-arptables
+echo 1 &gt; /proc/sys/net/bridge/bridge-nf-call-ip6tables
+echo 1 &gt; /proc/sys/net/bridge/bridge-nf-call-iptables
 
 /usr/bin/run-nomad
 </INLINE>
@@ -99,9 +115,12 @@ mkdir -p "&mountsDir;"
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 killall nomad
+rm -r "/usr/bin/nomad"
 rm -f "/usr/bin/run-nomad"
-rm -f /boot/packages/nomad_*.zip
+rm -f "/boot/packages/nomad_*"
+rm -f "/boot/packages/cni-plugins*"
 rm -rf "&pluginDir;"
+rm -rf "/opt/cni"
 rm -rf "&uiDir;"
 </INLINE>
 </FILE>
