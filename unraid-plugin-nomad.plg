@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name         "nomad">
 <!ENTITY author       "googol">
-<!ENTITY version      "2023-10-27-b">
+<!ENTITY version      "2023-10-27-c">
 <!ENTITY pluginURL    "https://raw.githubusercontent.com/googol/unraid-plugin-nomad/master/unraid-plugin-nomad.plg">
 <!ENTITY nomadVersion "1.6.2">
 <!ENTITY nomadMd5     "7de14344fdbf1fb52d85f718be3dcaf9">
@@ -23,11 +23,13 @@ pluginURL="&pluginURL;">
 <FILE Run="/bin/bash">
 <INLINE>
 <![CDATA[
+{
 echo "Running nomad cleanup"
 set -x
 rm -f "$(ls /boot/packages/nomad*.zip 2>/dev/null | grep -v '&nomadVersion;')"
 rm -f "/usr/bin/run-nomad"
 rm -rf "&uiDir;"
+} >&2
 ]]>
 </INLINE>
 </FILE>
@@ -63,6 +65,7 @@ Runs a nomad agent on unraid. Add your config files in &configDir;.
 #!/usr/bin/bash
 set -euo pipefail
 
+{
 rm -rf "&mountsDir;/*"
 
 for dirpath in /mnt/user/appdata/*; do
@@ -89,6 +92,7 @@ if [ -z "$(pidof nomad)" ]; then
 else
     echo "Nomad already running"
 fi
+} >&2
 ]]>
 </INLINE>
 </FILE>
@@ -97,6 +101,7 @@ fi
 <FILE Run="/bin/bash">
 <INLINE>
 <![CDATA[
+{
 echo "Running startup script"
 set -x
 unzip "&packagePath;" -d /usr/bin/
@@ -106,6 +111,7 @@ mkdir -p "&configDir;"
 mkdir -p "&mountsDir;"
 
 /usr/bin/run-nomad
+} >&2
 ]]>
 </INLINE>
 </FILE>
@@ -114,11 +120,13 @@ mkdir -p "&mountsDir;"
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
 <![CDATA[
+{
 killall nomad
 rm -f "/usr/bin/run-nomad"
-rm /boot/packages/nomad_*.zip
+rm -f /boot/packages/nomad_*.zip
 rm -rf "&pluginDir;"
 rm -rf "&uiDir;"
+} >&2
 ]]>
 </INLINE>
 </FILE>
